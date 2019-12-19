@@ -1,4 +1,6 @@
-﻿using System;
+﻿using RestSharp;
+using System;
+using System.Net.Http;
 
 namespace WeSenderSDK
 {
@@ -12,16 +14,17 @@ namespace WeSenderSDK
             this.apiKey = apiKey;
         }
 
-        public void sendMessage(MessageObject messageObject)
+        public void SendMessage(MessageObjectModel messageObject)
         {
-            return;
-        }
+            var client = new RestClient(this.url);
+            var request = new RestRequest("/envio/apikey", Method.POST);
+            request.AddParameter("ApiKey", this.apiKey);
+            request.AddParameter("Destino", new String[] {"941056884"});
+            request.AddParameter("Mensagem", messageObject.message);
+            request.AddParameter("CEspecial", messageObject.hasSpecialCharacter);
 
-        protected class MessageObject
-        {
-            public Array destine;
-            public string message;
-            public bool hasSpecialCharacter = false;
+            var response = client.Execute(request);
         }
     }
 }
+
