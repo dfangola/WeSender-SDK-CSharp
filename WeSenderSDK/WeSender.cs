@@ -1,12 +1,15 @@
-﻿using RestSharp;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
-using System.Net.Http;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
 
 namespace WeSenderSDK
 {
     public class WeSender
     {
-        private string url = "http://apiwesender-dev.digitalfactory.co.ao";
+        private string url = "https://api.wesender.co.ao";
         private string apiKey;
 
         public WeSender (string apiKey)
@@ -14,17 +17,65 @@ namespace WeSenderSDK
             this.apiKey = apiKey;
         }
 
-        public void SendMessage(MessageObjectModel messageObject)
+        public WSResult SendMessage(List<string> destines, string message, bool hasSpecialCharacter = false )
         {
-            var client = new RestClient(this.url);
-            var request = new RestRequest("/envio/apikey", Method.POST);
-            request.AddParameter("ApiKey", this.apiKey);
-            request.AddParameter("Destino", new String[] {"941056884"});
-            request.AddParameter("Mensagem", messageObject.message);
-            request.AddParameter("CEspecial", messageObject.hasSpecialCharacter);
+            var res = new WSResult {
+                Success = false,
+                Message = "Generic Erro"
+            };
 
-            var response = client.Execute(request);
-        }
+            WebRequest request = WebRequest.Create($"{this.url}/envio/apikey");
+            request.Method = "POST";
+            request.ContentType = "application/json";
+
+            var body = new
+            {
+                ApiKey = this.apiKey,
+                Destino = destines,
+                Mensagem = message,
+                CEspecial = hasSpecialCharacter
+            };
+
+            var json_order = JsonConvert.SerializeObject(body, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore });
+
+            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
+            {
+                streamWriter.Write(json_order);
+            }
+
+            WebResponse response = request.GetResponse();
+
+            var statusCode = Convert.ToInt16(((HttpWebResponse)response).StatusCode);
+
+            if(statusCode == 200)
+            {
+                string json_string;
+                using (Stream dataStream = response.GetResponseStream())
+                {
+                    StreamReader str = new StreamReader(dataStream);
+                    json_string = str.ReadToEnd();
+                }
+
+                if (!string.IsNullOrEmpty(json_string))
+                {
+                    JObject obj = JObject.Parse(json_string);
+
+                    res.Success = (bool)obj["Exito"];
+
+                    res.Message = obj["Mensagem"].ToString();
+                }                
+            }
+
+            return res;
+        }       
+        
+    }
+
+    public class WSResult
+    {
+        public bool Success { get; set; }
+
+        public string Message { get; set; }
     }
 }
 

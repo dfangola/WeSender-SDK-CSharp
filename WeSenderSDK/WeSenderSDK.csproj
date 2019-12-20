@@ -2,10 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Authors>Acidiney Dias &lt;acidiney.dias@digitalfactory.co.ao&gt;, Erikson Melgarejo &lt;erikson.melgarejo@digitalfactory.co.ao&gt;</Authors>
+    <Company>Digital Factory Angola</Company>
+    <Product>WeSender</Product>
+    <Description>SDK do WeSender para facilitar o envio de mensagem apartir da API.</Description>
+    <Copyright>2019</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RestSharp" Version="106.6.10" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
 </Project>
