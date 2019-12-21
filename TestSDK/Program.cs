@@ -9,13 +9,12 @@ namespace TestSDK
         static void Main(string[] args)
         {
             var WSDK = new WeSender("apikey");
-            var list = new List<string>();
-            list.Add("920000000");
-            var payload = new MessageObjectModel();
-            payload.destine = list;
-            payload.message = "Olá";
+            var destines = new List<string>();
+            destines.Add("920000000");
+            
+            string message = "Olá";
 
-            WSDK.SendMessage(payload);
+            WSDK.SendMessage(destines, message);
         }
     }
 }
