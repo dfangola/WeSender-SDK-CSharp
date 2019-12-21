@@ -40,5 +40,8 @@ var response = WSDK.SendMessage(destines, "Olá Angola");
 ## License
 MIT
 
-## Autor
+## Contributors
+[Erikson Melgarejo](mailto:mailto:erikson.melgarejo@digitalfactory.co.ao)
+
+## Author
 [Acidiney Dias](mailto:mailto:acidiney.dias@digitalfactory.co.ao)
