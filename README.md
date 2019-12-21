@@ -29,8 +29,6 @@ Resposta do método é a mesma que a da API:
 
 ## Exemplo
 
-- Usando arquivo
-
 ```cs
 using WeSenderSDK;
 var WSDK = new WeSender("apikey");
