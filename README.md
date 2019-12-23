@@ -7,16 +7,10 @@
 
 ## Métodos diponiveis no momento
 ### - sendMessage
-Esse metodo recebe um `payload` com as informações que devem ser enviadas e para quem deve ser enviado.
+Esse metodo recebe `três parametros` com as informações que devem ser enviadas e para quem deve ser enviado.
  ```cs
-
-payload: {
-  destine: List<string>,
-  message: string,
-  hasSpecialCharacter: bool // opcional, by default is false
-}
-
- ```
+SendMessage (List<string> destines, string message, bool hasSpecialCharacter = false)
+ ``` 
 Resposta do método é a mesma que a da API:
 ```cs
 
