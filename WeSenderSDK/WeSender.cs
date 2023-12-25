@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Net.Http;
+using System.Net.Http.Json;
+using System.Threading.Tasks;
 
 namespace WeSenderSDK
 {
@@ -11,64 +12,37 @@ namespace WeSenderSDK
     {
         private string url = "https://api.wesender.co.ao";
         private string apiKey;
+        HttpClient client = new HttpClient();
 
-        public WeSender (string apiKey)
+        public WeSender(string apiKey)
         {
             this.apiKey = apiKey;
         }
 
-        public WSResult SendMessage(List<string> destines, string message, bool hasSpecialCharacter = false )
+        public async Task<WSResult> SendMessage(List<string> destines, string message, bool hasSpecialCharacter = false)
         {
-            var res = new WSResult {
+            var res = new WSResult
+            {
                 Success = false,
                 Message = "Generic Erro"
             };
 
-            WebRequest request = WebRequest.Create($"{this.url}/envio/apikey");
-            request.Method = "POST";
-            request.ContentType = "application/json";
-
-            var body = new
-            {
-                ApiKey = this.apiKey,
+            var respostaRequisicao = await client.PostAsJsonAsync<RequestBody>($"{url}/envio/apikey", new RequestBody{
+                ApiKey = apiKey,
+                CEspeciais = hasSpecialCharacter,
                 Destino = destines,
-                Mensagem = message,
-                CEspecial = hasSpecialCharacter
-            };
+                Mensagem = message
+            });
 
-            var json_order = JsonConvert.SerializeObject(body, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore });
-
-            using (var streamWriter = new StreamWriter(request.GetRequestStream()))
-            {
-                streamWriter.Write(json_order);
-            }
-
-            WebResponse response = request.GetResponse();
-
-            var statusCode = Convert.ToInt16(((HttpWebResponse)response).StatusCode);
-
-            if(statusCode == 200)
-            {
-                string json_string;
-                using (Stream dataStream = response.GetResponseStream())
-                {
-                    StreamReader str = new StreamReader(dataStream);
-                    json_string = str.ReadToEnd();
-                }
-
-                if (!string.IsNullOrEmpty(json_string))
-                {
-                    JObject obj = JObject.Parse(json_string);
-
-                    res.Success = (bool)obj["Exito"];
-
-                    res.Message = obj["Mensagem"].ToString();
-                }                
+            if(respostaRequisicao.IsSuccessStatusCode){
+                res = await respostaRequisicao.Content.ReadFromJsonAsync<WSResult>();
+            }else{
+                res.Message = (await respostaRequisicao.Content.ReadFromJsonAsync<WSResult>()).Message;
             }
 
             return res;
-        }       
-        
+        }
+
     }
 
     public class WSResult
@@ -76,6 +50,14 @@ namespace WeSenderSDK
         public bool Success { get; set; }
 
         public string Message { get; set; }
+    }
+
+    public class RequestBody
+    {
+        public string ApiKey { get; set; }
+        public List<string> Destino { get; set; }
+        public string Mensagem { get; set; }
+        public bool CEspeciais { get; set; }
     }
 }
 
