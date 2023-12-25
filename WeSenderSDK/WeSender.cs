@@ -19,33 +19,37 @@ namespace WeSenderSDK
             this.apiKey = apiKey;
         }
 
-        public async Task<WSResult> SendMessage(List<string> destines, string message, bool hasSpecialCharacter = false)
+        public async Task<RequestResult> SendMessage(List<string> messageTarget, string message, bool hasSpecialCharacter = false)
         {
-            var res = new WSResult
+            var sendMessageResponse = new RequestResult
             {
                 Success = false,
                 Message = "Generic Erro"
             };
 
-            var respostaRequisicao = await client.PostAsJsonAsync<RequestBody>($"{url}/envio/apikey", new RequestBody{
+            var requestResponse = await client.PostAsJsonAsync<RequestBody>($"{url}/envio/apikey", new RequestBody
+            {
                 ApiKey = apiKey,
                 CEspeciais = hasSpecialCharacter,
-                Destino = destines,
+                Destino = messageTarget,
                 Mensagem = message
             });
 
-            if(respostaRequisicao.IsSuccessStatusCode){
-                res = await respostaRequisicao.Content.ReadFromJsonAsync<WSResult>();
-            }else{
-                res.Message = (await respostaRequisicao.Content.ReadFromJsonAsync<WSResult>()).Message;
+            if (requestResponse.IsSuccessStatusCode)
+            {
+                sendMessageResponse = await requestResponse.Content.ReadFromJsonAsync<RequestResult>();
+            }
+            else
+            {
+                sendMessageResponse.Message = (await requestResponse.Content.ReadFromJsonAsync<RequestResult>()).Message;
             }
 
-            return res;
+            return sendMessageResponse;
         }
 
     }
 
-    public class WSResult
+    public class RequestResult
     {
         public bool Success { get; set; }
 
